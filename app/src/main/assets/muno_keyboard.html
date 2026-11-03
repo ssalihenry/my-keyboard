@@ -7,105 +7,79 @@
     <link rel="stylesheet" href="https://cdnjs.cloudflare.com/ajax/libs/font-awesome/6.4.0/css/all.min.css">
     <style>
         @import url('https://fonts.googleapis.com/css2?family=Inter:wght@400;600;800;900&display=swap');
-
-        * { 
-            box-sizing: border-box; margin: 0; padding: 0; font-family: 'Inter', sans-serif;
-            user-select: none; -webkit-user-select: none; -webkit-tap-highlight-color: transparent;
-        }
-
+        * { box-sizing: border-box; margin: 0; padding: 0; font-family: 'Inter', sans-serif; user-select: none; -webkit-user-select: none; -webkit-tap-highlight-color: transparent; }
         body { background: transparent; margin: 0; padding: 0; overflow: hidden; }
-
-        .inapp-keyboard {
-            width: 100vw; height: 380px;
-            background: rgba(10, 11, 14, 0.98); backdrop-filter: blur(20px);
-            border-top: 2px solid rgba(252, 220, 4, 0.4);
-            z-index: 9999999; display: flex; flex-direction: column; 
-            background-image: url('https://i.ibb.co/2zfHb0L/1000097083-removebg-preview.png');
-            background-position: center center; background-repeat: no-repeat; background-size: 120px;
-            position: relative;
-        }
-        
+        .inapp-keyboard { width: 100vw; height: 380px; background: rgba(10, 11, 14, 0.98); backdrop-filter: blur(20px); border-top: 2px solid rgba(252, 220, 4, 0.4); z-index: 9999999; display: flex; flex-direction: column; background-image: url('https://i.ibb.co/2zfHb0L/1000097083-removebg-preview.png'); background-position: center center; background-repeat: no-repeat; background-size: 120px; position: relative; }
         .kb-bg-overlay { position: absolute; inset: 0; background: rgba(10, 11, 14, 0.92); z-index: 1; pointer-events: none; }
-
-        .kb-toolbar { 
-            display: flex; justify-content: space-between; align-items: center; 
-            padding: 8px 12px; background: #15171e; border-bottom: 1px solid #333; z-index: 3;
-            position: relative;
-        }
-        .kb-tool-btn { 
-            background: #262a33; color: #fff; border: none; padding: 8px 12px; 
-            border-radius: 6px; font-size: 11px; font-weight: 700; cursor: pointer;
-            display: flex; align-items: center; gap: 6px; transition: 0.2s;
-            pointer-events: auto;
-        }
+        
+        .kb-toolbar { display: flex; justify-content: space-between; align-items: center; padding: 8px 6px; background: #15171e; border-bottom: 1px solid #333; z-index: 3; position: relative; }
+        
+        /* Make toolbar scrollable if buttons overflow */
+        .toolbar-scroll { display: flex; gap: 4px; overflow-x: auto; white-space: nowrap; max-width: 85%; scrollbar-width: none; }
+        .toolbar-scroll::-webkit-scrollbar { display: none; }
+        
+        .kb-tool-btn { background: #262a33; color: #fff; border: none; padding: 6px 8px; border-radius: 6px; font-size: 10px; font-weight: 700; cursor: pointer; display: flex; align-items: center; gap: 4px; transition: 0.2s; pointer-events: auto; }
         .kb-tool-btn:active { background: #E50914; transform: scale(0.95); }
+        
+        /* Special styling for the Movies button */
+        .btn-movies { background: #E50914; color: white; font-weight: 900; border: 1px solid #ff4d4d;}
+        .btn-movies:active { background: #ff1a1a; }
 
-        /* 🔥 NEW CODING SNIPPET BAR */
-        .kb-code-snippets {
-            display: none; background: #121418; border-bottom: 1px solid #333; 
-            padding: 6px; gap: 6px; overflow-x: auto; white-space: nowrap; z-index: 3;
-        }
+        .kb-code-snippets { display: none; background: #121418; border-bottom: 1px solid #333; padding: 6px; gap: 6px; overflow-x: auto; white-space: nowrap; z-index: 3; }
         .kb-code-snippets.active { display: flex; }
-        .snippet-item {
-            background: #262a33; color: #81C784; padding: 6px 10px; border-radius: 4px; 
-            font-size: 12px; font-weight: 700; border: 1px solid #444; cursor: pointer;
-        }
+        .snippet-item { background: #262a33; color: #81C784; padding: 6px 10px; border-radius: 4px; font-size: 12px; font-weight: 700; border: 1px solid #444; cursor: pointer; }
         .snippet-item:active { background: #4CAF50; color: #fff; }
-
+        
         .kb-keys-container { display: flex; flex-direction: column; gap: 6px; flex-grow: 1; z-index: 2; padding: 8px 4px 12px 4px; }
         .kb-row { display: flex; justify-content: center; gap: 3px; width: 100%; flex: 1; }
-        
-        .kb-key {
-            flex: 1 1 0%; min-width: 0; border-radius: 6px; display: flex; align-items: center; justify-content: center;
-            font-size: 16px; font-weight: 800; cursor: pointer; transition: all 0.1s;
-            border: 1px solid rgba(0,0,0,0.5); text-shadow: 0 1px 2px rgba(0,0,0,0.3);
-            height: 100%; touch-action: manipulation; overflow: hidden;
-        }
+        .kb-key { flex: 1 1 0%; min-width: 0; border-radius: 6px; display: flex; align-items: center; justify-content: center; font-size: 16px; font-weight: 800; cursor: pointer; transition: all 0.1s; border: 1px solid rgba(0,0,0,0.5); text-shadow: 0 1px 2px rgba(0,0,0,0.3); height: 100%; touch-action: manipulation; overflow: hidden; }
         
         .ug-black { background: #111111; color: #ffffff; box-shadow: 0 4px 0 #000000; }
         .ug-yellow { background: #FCDC04; color: #000000; box-shadow: 0 4px 0 #b59d00; border-color: #d4b500; text-shadow: none; }
         .ug-red { background: #D90000; color: #ffffff; box-shadow: 0 4px 0 #8f0000; }
-
+        
         .kb-key:active, .kb-key.pressed { transform: translateY(4px); box-shadow: 0 0px 0 transparent !important; filter: brightness(0.8); }
-
+        
         .kb-key.action { font-size: 12px; color: #fff; background: #262a33; box-shadow: 0 4px 0 #111; }
         .kb-key.wide { flex: 3.5; font-size: 14px; }
         .kb-key i { font-size: 16px; }
         .kb-key.active-shift { background: #FCDC04; color: #000; box-shadow: 0 4px 0 #b59d00; }
         .kb-key.enter { background: #D90000; color: #fff; flex: 2; font-size: 14px; font-weight: 900; box-shadow: 0 4px 0 #8f0000; }
         .kb-key.space { flex: 4; }
-
+        
         .kb-key.pc-key { background: #262a33; color: #e2e8f0; font-size: 11px; font-weight: 600; box-shadow: 0 3px 0 #111; padding: 0 2px; text-shadow: none; }
         .kb-key.pc-key.special { background: #1a1c23; color: #9ca3af; font-size: 10px; }
         .kb-key.pc-key:active, .kb-key.pc-key.pressed { transform: translateY(3px); box-shadow: 0 0px 0 transparent !important; filter: brightness(0.8); }
         
         .kb-key.code-key { background: #1e1e1e; color: #4CAF50; font-size: 16px; font-weight: bold; box-shadow: 0 3px 0 #000; }
         .kb-key.code-key.special { background: #2d2d2d; color: #81C784; font-size: 11px; }
-
+        
         .kb-mods-panel { display: none; flex-wrap: wrap; gap: 8px; padding: 10px; height: 100%; overflow-y: auto; z-index: 2; background: rgba(10, 11, 14, 0.95); border-top: 1px solid #333; }
         .kb-mods-panel.active { display: flex; }
-        .mod-item { background: #262a33; color: #fff; padding: 8px 12px; border-radius: 8px; font-size: 14px; font-weight: 700; cursor: pointer; border: 1px solid #444; }
+        .mod-item { background: #262a33; color: #fff; padding: 8px 12px; border-radius: 8px; font-size: 13px; font-weight: 700; cursor: pointer; border: 1px solid #444; }
         .mod-item:active { background: #E50914; }
     </style>
 </head>
 <body>
-
     <div id="customKeyboard" class="inapp-keyboard">
         <div class="kb-bg-overlay"></div>
         
         <div class="kb-toolbar">
-            <div style="display: flex; gap: 4px;">
+            <div class="toolbar-scroll">
                 <button class="kb-tool-btn" onpointerdown="kbCopy()"><i class="fa-regular fa-copy"></i></button>
                 <button class="kb-tool-btn" onpointerdown="kbPaste()"><i class="fa-regular fa-paste"></i></button>
                 <button class="kb-tool-btn" onpointerdown="kbTogglePC()"><i class="fa-solid fa-desktop"></i> PC</button>
                 <button class="kb-tool-btn" onpointerdown="kbToggleCode()"><i class="fa-solid fa-code"></i> Code</button>
+                <button class="kb-tool-btn" onpointerdown="kbToggleCheats()"><i class="fa-solid fa-gamepad"></i> Cheats</button>
+                <button class="kb-tool-btn" onpointerdown="kbToggleLife()"><i class="fa-solid fa-heart"></i> Life</button>
+                <!-- 🔥 NEW MOVIES BUTTON -->
+                <button class="kb-tool-btn btn-movies" onpointerdown="kbOpenMovies()"><i class="fa-solid fa-film"></i> Movies</button>
             </div>
-            <div style="display: flex; gap: 8px;">
+            <div style="display: flex; gap: 4px;">
                 <button class="kb-tool-btn" onpointerdown="kbCloseKeyboard()"><i class="fa-solid fa-chevron-down"></i></button>
             </div>
         </div>
 
-        <!-- 🔥 CODING SNIPPETS BAR -->
         <div class="kb-code-snippets" id="kbCodeSnippets">
             <div class="snippet-item" onpointerdown="kbType('.com')">.com</div>
             <div class="snippet-item" onpointerdown="kbType('.html')">.html</div>
@@ -123,6 +97,77 @@
 
         <div class="kb-keys-container" id="kbKeysContainer"></div>
         
+        <!-- CHEATS PANEL -->
+        <div class="kb-mods-panel" id="kbCheatsPanel">
+            <div style="width:100%; color:#FCDC04; font-size:12px; font-weight:bold; margin-bottom:5px;">🎮 GTA SAN ANDREAS</div>
+            <div class="mod-item" onpointerdown="kbType('HESOYAM')">Health/Money</div>
+            <div class="mod-item" onpointerdown="kbType('INEEDSOMEHELP')">Full Health</div>
+            <div class="mod-item" onpointerdown="kbType('FULLCLIP')">Infinite Ammo</div>
+            <div class="mod-item" onpointerdown="kbType('BAGUVIX')">Semi-Health</div>
+            <div class="mod-item" onpointerdown="kbType('LXGIWYL')">Weapons 1</div>
+            <div class="mod-item" onpointerdown="kbType('PROFESSIONALSKIT')">Weapons 2</div>
+            <div class="mod-item" onpointerdown="kbType('UZUMYMW')">Weapons 3</div>
+            <div class="mod-item" onpointerdown="kbType('ROCKETMAN')">Jetpack</div>
+            <div class="mod-item" onpointerdown="kbType('IWPRTON')">Tank</div>
+            <div class="mod-item" onpointerdown="kbType('KANGAROO')">Mega Jump</div>
+            <div class="mod-item" onpointerdown="kbType('STINGLIKEABEE')">Super Punch</div>
+            <div class="mod-item" onpointerdown="kbType('STATEOFEMERGENCY')">Riot Mode</div>
+            <div style="width:100%; color:#FCDC04; font-size:12px; font-weight:bold; margin-top:10px; margin-bottom:5px;">🎮 GTA VICE CITY</div>
+            <div class="mod-item" onpointerdown="kbType('ASPIRINE')">Full Health</div>
+            <div class="mod-item" onpointerdown="kbType('PRECIOUSPROTECTION')">Full Armor</div>
+            <div class="mod-item" onpointerdown="kbType('NUTTERTOOLS')">Heavy Weapons</div>
+            <div class="mod-item" onpointerdown="kbType('PANZER')">Tank</div>
+            <div class="mod-item" onpointerdown="kbType('YOUWONTTAKEMEALIVE')">Raise Wanted</div>
+            <div class="mod-item" onpointerdown="kbType('LEAVEMEALONE')">Lower Wanted</div>
+            <div class="mod-item" onpointerdown="kbType('SEAWAYS')">Cars on Water</div>
+            <div class="mod-item" onpointerdown="kbType('COMEFLYWITHME')">Flying Cars</div>
+            <div style="width:100%; color:#FCDC04; font-size:12px; font-weight:bold; margin-top:10px; margin-bottom:5px;">🔫 PUBG CODES</div>
+            <div class="mod-item" onpointerdown="kbType('PGMB20')">PGMB20</div>
+            <div class="mod-item" onpointerdown="kbType('CMCKZBZBAW')">CMCKZBZBAW</div>
+            <div class="mod-item" onpointerdown="kbType('PUBGMBRAUC')">PUBGMBRAUC</div>
+            <div class="mod-item" onpointerdown="kbType('KurbanBayrami26')">KurbanBayrami26</div>
+            <div style="width:100%; color:#FCDC04; font-size:12px; font-weight:bold; margin-top:10px; margin-bottom:5px;">📱 PHONE CODES</div>
+            <div class="mod-item" onpointerdown="kbType('*#06#')">IMEI</div>
+            <div class="mod-item" onpointerdown="kbType('*#*#4636#*#*')">Battery Info</div>
+            <div class="mod-item" onpointerdown="kbType('*#0*#')">HW Test</div>
+            <div class="mod-item" onpointerdown="kbType('*#9900#')">Clear Logs</div>
+            <div class="mod-item" onpointerdown="kbType('**05***#')">SIM Unlock</div>
+        </div>
+
+        <!-- LIFE PANEL -->
+        <div class="kb-mods-panel" id="kbLifePanel">
+            <div style="width:100%; color:#FCDC04; font-size:12px; font-weight:bold; margin-bottom:5px;">💡 QUICK LINKS</div>
+            <div class="mod-item" onpointerdown="kbType('@gmail.com')">@gmail.com</div>
+            <div class="mod-item" onpointerdown="kbType('@yahoo.com')">@yahoo.com</div>
+            <div class="mod-item" onpointerdown="kbType(' +256 ')">+256</div>
+            <div class="mod-item" onpointerdown="kbType('https://')">https://</div>
+            <div class="mod-item" onpointerdown="kbType('wa.me/')">wa.me/</div>
+            <div style="width:100%; color:#FCDC04; font-size:12px; font-weight:bold; margin-top:10px; margin-bottom:5px;">💬 QUICK REPLIES</div>
+            <div class="mod-item" onpointerdown="kbType('Running late, sorry!')">Running late</div>
+            <div class="mod-item" onpointerdown="kbType('On my way!')">On my way</div>
+            <div class="mod-item" onpointerdown="kbType('Thank you!')">Thank you</div>
+            <div class="mod-item" onpointerdown="kbType('Please call me.')">Call me</div>
+            <div class="mod-item" onpointerdown="kbType('I will get back to you soon.')">Get back soon</div>
+            <div class="mod-item" onpointerdown="kbType('See you tomorrow.')">See you</div>
+            <div class="mod-item" onpointerdown="kbType('Good morning!')">Good morning</div>
+            <div class="mod-item" onpointerdown="kbType('Good night!')">Good night</div>
+            <div class="mod-item" onpointerdown="kbType('How are you?')">How are you?</div>
+            <div class="mod-item" onpointerdown="kbType('I am fine, thanks.')">Fine, thanks</div>
+            <div class="mod-item" onpointerdown="kbType('Happy birthday! 🎂')">Happy birthday</div>
+            <div class="mod-item" onpointerdown="kbType('Congratulations! 🎉')">Congrats</div>
+            <div class="mod-item" onpointerdown="kbType('LOL 😂')">LOL</div>
+            <div class="mod-item" onpointerdown="kbType('OMG 😮')">OMG</div>
+            <div class="mod-item" onpointerdown="kbType('❤️')">❤️</div>
+            <div class="mod-item" onpointerdown="kbType('👍')">👍</div>
+            <div class="mod-item" onpointerdown="kbType('🙏')">🙏</div>
+            <div class="mod-item" onpointerdown="kbType('🎬')">🎬</div>
+            <div class="mod-item" onpointerdown="kbType('🍿')">🍿</div>
+            <div class="mod-item" onpointerdown="kbType('🇺🇬')">🇺🇬</div>
+            <div class="mod-item" onpointerdown="kbType('Best regards,')">Best regards</div>
+            <div class="mod-item" onpointerdown="kbType('Cheers!')">Cheers</div>
+        </div>
+
+        <!-- ORIGINAL MODS PANEL -->
         <div class="kb-mods-panel" id="kbModsPanel">
             <div class="mod-item" onpointerdown="kbType('@gmail.com')">@gmail.com</div>
             <div class="mod-item" onpointerdown="kbType('@yahoo.com')">@yahoo.com</div>
@@ -138,203 +183,99 @@
     </div>
 
     <script>
-        const layoutBasic = [
-            ['q', 'w', 'e', 'r', 't', 'y', 'u', 'i', 'o', 'p'],
-            ['a', 's', 'd', 'f', 'g', 'h', 'j', 'k', 'l'],
-            ['Shift', 'z', 'x', 'c', 'v', 'b', 'n', 'm', 'Backspace'],
-            ['123', 'Mods', 'space', '.', 'enter']
-        ];
-
-        const layoutNumbers = [
-            ['1', '2', '3', '4', '5', '6', '7', '8', '9', '0'],
-            ['-', '/', ':', ';', '(', ')', '$', '&', '@', '"'],
-            ['#+=', '.', ',', '?', '!', "'", 'Backspace'],
-            ['ABC', 'Mods', 'space', 'enter']
-        ];
-
-        const layoutPC = [
-            ['Esc', 'F1', 'F2', 'F3', 'F4', 'F5', 'F6', 'F7', 'F8', 'F9', 'F10', 'F11', 'F12', 'Backspace'],
-            ['~', '1', '2', '3', '4', '5', '6', '7', '8', '9', '0', '-', '=', 'Backspace'],
-            ['Tab', 'q', 'w', 'e', 'r', 't', 'y', 'u', 'i', 'o', 'p', '[', ']', '\\'],
-            ['Caps', 'a', 's', 'd', 'f', 'g', 'h', 'j', 'k', 'l', ';', "'", 'Enter'],
-            ['Shift', 'z', 'x', 'c', 'v', 'b', 'n', 'm', ',', '.', '/', 'Shift'],
-            ['Ctrl', 'Alt', 'Mods', 'space', 'Alt', 'Ctrl']
-        ];
-
-        const layoutCoding = [
-            ['1', '2', '3', '4', '5', '6', '7', '8', '9', '0'],
-            ['{', '}', '[', ']', '(', ')', '<', '>', '=', '+'],
-            ['#', '$', '%', '^', '&', '*', '|', '~', '`', '!'],
-            ['Tab', ';', ':', '"', "'", '/', '\\', ',', '.', 'Backspace'],
-            ['Ctrl', 'Alt', 'Mods', 'space', 'enter']
-        ];
-
-        let currentLayout = 'basic'; 
-        let isShiftActive = false;
-        let isModsActive = false;
-        let colorIndex = 0;
-        const ugandaColors = ['ug-black', 'ug-yellow', 'ug-red'];
+        const layoutBasic = [['q','w','e','r','t','y','u','i','o','p'],['a','s','d','f','g','h','j','k','l'],['Shift','z','x','c','v','b','n','m','Backspace'],['123','Mods','space','.','enter']];
+        const layoutNumbers = [['1','2','3','4','5','6','7','8','9','0'],['-','/', ':', ';','(',')','$','&','@','"'],['#+=','.',',','?','!',"'",'Backspace'],['ABC','Mods','space','enter']];
+        const layoutPC = [['Esc','F1','F2','F3','F4','F5','F6','F7','F8','F9','F10','F11','F12','Backspace'],['~','1','2','3','4','5','6','7','8','9','0','-','=','Backspace'],['Tab','q','w','e','r','t','y','u','i','o','p','[',']','\\'],['Caps','a','s','d','f','g','h','j','k','l',';',"'",'Enter'],['Shift','z','x','c','v','b','n','m',',','.','/','Shift'],['Ctrl','Alt','Mods','space','Alt','Ctrl']];
+        const layoutCoding = [['1','2','3','4','5','6','7','8','9','0'],['{','}','[',']','(',')','<','>','=','+'],['#','$','%','^','&','*','|','~','`','!'],['Tab',';',':', '"',"'",'/','\\',',','.','Backspace'],['Ctrl','Alt','Mods','space','enter']];
+        
+        let currentLayout = 'basic'; let activePanel = 'none'; let isShiftActive = false; let colorIndex = 0;
+        const ugandaColors = ['ug-black','ug-yellow','ug-red'];
 
         function renderLayout() {
             const container = document.getElementById('kbKeysContainer');
-            const modsPanel = document.getElementById('kbModsPanel');
+            const panels = { mods: document.getElementById('kbModsPanel'), cheats: document.getElementById('kbCheatsPanel'), life: document.getElementById('kbLifePanel') };
             const snippetBar = document.getElementById('kbCodeSnippets');
             if (!container) return;
-
-            if (isModsActive) {
+            
+            if (activePanel !== 'none') {
                 container.style.display = 'none';
-                modsPanel.classList.add('active');
-                snippetBar.classList.remove('active'); // Hide snippets in Mods
+                snippetBar.classList.remove('active');
+                for (let key in panels) { if (key === activePanel) panels[key].classList.add('active'); else panels[key].classList.remove('active'); }
                 return;
             } else {
                 container.style.display = 'flex';
-                modsPanel.classList.remove('active');
-                
-                // 🔥 SHOW SNIPPETS ONLY IN CODING MODE
-                if (currentLayout === 'coding') {
-                    snippetBar.classList.add('active');
-                } else {
-                    snippetBar.classList.remove('active');
-                }
+                for (let key in panels) panels[key].classList.remove('active');
+                if (currentLayout === 'coding') snippetBar.classList.add('active'); else snippetBar.classList.remove('active');
             }
-
+            
             let layout = layoutBasic;
             if (currentLayout === 'numbers') layout = layoutNumbers;
             if (currentLayout === 'pc') layout = layoutPC;
             if (currentLayout === 'coding') layout = layoutCoding;
-
-            let html = '';
-            colorIndex = 0; 
-
+            
+            let html = ''; colorIndex = 0;
             layout.forEach(row => {
                 html += `<div class="kb-row">`;
                 row.forEach(key => {
-                    let displayKey = key;
-                    let classes = 'kb-key';
-                    let actionAttr = `onpointerdown="handleKbPress(event, '${key}')"`;
-
-                    if (currentLayout === 'pc') {
-                        classes += ' pc-key';
-                        if (['Ctrl', 'Alt', 'Shift', 'Tab', 'Caps', 'Esc', 'Enter', 'Backspace'].includes(key)) {
-                            classes += ' special';
-                        }
-                        if (key === 'space') classes += ' wide';
-                    } else if (currentLayout === 'coding') {
-                        classes += ' code-key'; 
-                        if (['Ctrl', 'Alt', 'Tab', 'Backspace'].includes(key)) {
-                            classes += ' special';
-                        }
-                        if (key === 'space') classes += ' wide';
-                    } else {
-                        if (key.length === 1 && key !== ' ') {
-                            classes += ` ${ugandaColors[colorIndex % 3]}`;
-                            colorIndex++;
-                        }
-                    }
-
-                    if (key === 'Shift') {
-                        displayKey = '<i class="fa-solid fa-arrow-up"></i>';
-                        if (currentLayout !== 'pc') classes = 'kb-key action';
-                        if (isShiftActive) classes += ' active-shift';
-                    } else if (key === 'Backspace') {
-                        displayKey = '<i class="fa-solid fa-delete-left"></i>';
-                        if (currentLayout !== 'pc' && currentLayout !== 'coding') classes = 'kb-key action';
-                    } else if (key === '123' || key === 'ABC' || key === '#+=') {
-                        classes = 'kb-key action';
-                    } else if (key === 'Mods') {
-                        displayKey = '<i class="fa-solid fa-wand-magic-sparkles"></i>';
-                        classes = 'kb-key action';
-                    } else if (key === 'space') {
-                        displayKey = 'Space';
-                        if (currentLayout !== 'pc' && currentLayout !== 'coding') classes = 'kb-key wide space action';
-                    } else if (key === 'enter' || key === 'Enter') {
-                        displayKey = 'SEND';
-                        classes = 'kb-key enter';
-                    } else if (currentLayout === 'basic' && isShiftActive && key.length === 1) {
-                        displayKey = key.toUpperCase();
-                    } else if (key === 'Caps') {
-                        classes += isShiftActive ? ' active-shift' : '';
-                    }
-
+                    let displayKey = key; let classes = 'kb-key'; let actionAttr = `onpointerdown="handleKbPress(event, '${key}')"`;
+                    if (currentLayout === 'pc') { classes += ' pc-key'; if (['Ctrl','Alt','Shift','Tab','Caps','Esc','Enter','Backspace'].includes(key)) classes += ' special'; if (key === 'space') classes += ' wide'; }
+                    else if (currentLayout === 'coding') { classes += ' code-key'; if (['Ctrl','Alt','Tab','Backspace'].includes(key)) classes += ' special'; if (key === 'space') classes += ' wide'; }
+                    else { if (key.length === 1 && key !== ' ') { classes += ` ${ugandaColors[colorIndex % 3]}`; colorIndex++; } }
+                    
+                    if (key === 'Shift') { displayKey = '<i class="fa-solid fa-arrow-up"></i>'; if (currentLayout !== 'pc') classes = 'kb-key action'; if (isShiftActive) classes += ' active-shift'; }
+                    else if (key === 'Backspace') { displayKey = '<i class="fa-solid fa-delete-left"></i>'; if (currentLayout !== 'pc' && currentLayout !== 'coding') classes = 'kb-key action'; }
+                    else if (key === '123' || key === 'ABC' || key === '#+=') { classes = 'kb-key action'; }
+                    else if (key === 'Mods') { displayKey = '<i class="fa-solid fa-wand-magic-sparkles"></i>'; classes = 'kb-key action'; }
+                    else if (key === 'space') { displayKey = 'Space'; if (currentLayout !== 'pc' && currentLayout !== 'coding') classes = 'kb-key wide space action'; }
+                    else if (key === 'enter' || key === 'Enter') { displayKey = 'SEND'; classes = 'kb-key enter'; }
+                    else if (currentLayout === 'basic' && isShiftActive && key.length === 1) { displayKey = key.toUpperCase(); }
+                    else if (key === 'Caps') { classes += isShiftActive ? ' active-shift' : ''; }
                     html += `<div class="${classes}" ${actionAttr}>${displayKey}</div>`;
                 });
                 html += `</div>`;
             });
-
             container.innerHTML = html;
         }
 
         window.handleKbPress = function(e, key) {
-            e.preventDefault();
-            if (navigator.vibrate) navigator.vibrate(15);
+            e.preventDefault(); if (navigator.vibrate) navigator.vibrate(15); if (window.Android && window.Android.playClick) window.Android.playClick();
+            const keyEl = e.target.closest('.kb-key'); if (keyEl) { keyEl.classList.add('pressed'); setTimeout(() => keyEl.classList.remove('pressed'), 100); }
             
-            if (window.Android && window.Android.playClick) {
-                window.Android.playClick();
-            }
-
-            const keyEl = e.target.closest('.kb-key');
-            if (keyEl) {
-                keyEl.classList.add('pressed');
-                setTimeout(() => keyEl.classList.remove('pressed'), 100);
-            }
-
             if (key === 'Shift' || key === 'Caps') { isShiftActive = !isShiftActive; renderLayout(); return; }
             if (key === '123') { currentLayout = 'numbers'; isShiftActive = false; renderLayout(); return; }
             if (key === 'ABC') { currentLayout = 'basic'; renderLayout(); return; }
-            if (key === 'Mods') { isModsActive = !isModsActive; renderLayout(); return; }
-            if (key === 'Esc' || key === 'Tab') { typeCharacter(key); return; } 
-            if (key === 'Ctrl' || key === 'Alt') { typeCharacter(key); return; } 
-
+            if (key === 'Mods') { activePanel = (activePanel === 'mods') ? 'none' : 'mods'; renderLayout(); return; }
+            if (key === 'Esc' || key === 'Tab') { typeCharacter(key); return; }
+            if (key === 'Ctrl' || key === 'Alt') { typeCharacter(key); return; }
             if (key === 'Backspace') { typeCharacter('Backspace'); return; }
             if (key === 'enter' || key === 'Enter') { typeCharacter('enter'); return; }
             if (key === 'space') { typeCharacter(' '); return; }
-
-            let charToType = key;
-            if (isShiftActive && key.length === 1) {
-                charToType = key.toUpperCase();
-                isShiftActive = false;
-                renderLayout();
-            }
+            
+            let charToType = key; if (isShiftActive && key.length === 1) { charToType = key.toUpperCase(); isShiftActive = false; renderLayout(); }
             typeCharacter(charToType);
         };
 
-        window.kbType = function(char) {
-            typeCharacter(char);
-            if (navigator.vibrate) navigator.vibrate(15);
-            if (window.Android && window.Android.playClick) {
-                window.Android.playClick();
-            }
-        };
-
-        function typeCharacter(char) {
-            if (window.Android && window.Android.sendKey) {
-                window.Android.sendKey(char);
-            }
-        }
-
+        window.kbType = function(char) { typeCharacter(char); if (navigator.vibrate) navigator.vibrate(15); if (window.Android && window.Android.playClick) window.Android.playClick(); };
+        function typeCharacter(char) { if (window.Android && window.Android.sendKey) window.Android.sendKey(char); }
+        
         window.kbCopy = function() { if (window.Android && window.Android.copyText) window.Android.copyText(); };
         window.kbPaste = function() { if (window.Android && window.Android.pasteText) window.Android.pasteText(); };
         
-        window.kbTogglePC = function() {
-            currentLayout = (currentLayout === 'pc') ? 'basic' : 'pc';
-            isModsActive = false;
-            renderLayout();
+        window.kbTogglePC = function() { currentLayout = (currentLayout === 'pc') ? 'basic' : 'pc'; activePanel = 'none'; renderLayout(); };
+        window.kbToggleCode = function() { currentLayout = (currentLayout === 'coding') ? 'basic' : 'coding'; activePanel = 'none'; renderLayout(); };
+        window.kbToggleCheats = function() { activePanel = (activePanel === 'cheats') ? 'none' : 'cheats'; renderLayout(); };
+        window.kbToggleLife = function() { activePanel = (activePanel === 'life') ? 'none' : 'life'; renderLayout(); };
+        
+        // 🔥 NEW FUNCTION TO OPEN THE WEBSITE
+        window.kbOpenMovies = function() { 
+            if (window.Android && window.Android.openWebsite) {
+                window.Android.openWebsite("https://munowatch-2c399.web.app");
+            }
         };
 
-        window.kbToggleCode = function() {
-            currentLayout = (currentLayout === 'coding') ? 'basic' : 'coding';
-            isModsActive = false;
-            renderLayout();
-        };
-
-        window.kbCloseKeyboard = function() {
-            if (window.Android && window.Android.hideKeyboard) window.Android.hideKeyboard();
-        };
-
-        document.querySelector('.inapp-keyboard').addEventListener('pointerdown', (e) => {
-            if(!e.target.closest('.kb-tool-btn')) e.preventDefault(); 
-        });
-
+        window.kbCloseKeyboard = function() { if (window.Android && window.Android.hideKeyboard) window.Android.hideKeyboard(); };
+        
+        document.querySelector('.inapp-keyboard').addEventListener('pointerdown', (e) => { if(!e.target.closest('.kb-tool-btn')) e.preventDefault(); });
         renderLayout();
     </script>
 </body>
