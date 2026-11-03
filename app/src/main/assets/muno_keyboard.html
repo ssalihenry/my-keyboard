@@ -14,17 +14,21 @@
         }
 
         body { 
-            background: #000; height: 100vh; display: flex; flex-direction: column; 
-            justify-content: flex-end; overflow: hidden;
+            background: transparent; 
+            margin: 0;
+            padding: 0;
+            overflow: hidden;
         }
 
         .inapp-keyboard {
-            position: fixed; bottom: 0; left: 0; right: 0; height: 380px;
+            width: 100vw;
+            height: 380px;
             background: rgba(10, 11, 14, 0.98); backdrop-filter: blur(20px);
             border-top: 2px solid rgba(252, 220, 4, 0.4);
             z-index: 9999999; display: flex; flex-direction: column; 
             background-image: url('https://i.ibb.co/2zfHb0L/1000097083-removebg-preview.png');
             background-position: center center; background-repeat: no-repeat; background-size: 120px;
+            position: relative;
         }
         
         .kb-bg-overlay { position: absolute; inset: 0; background: rgba(10, 11, 14, 0.92); z-index: 1; pointer-events: none; }
@@ -54,6 +58,7 @@
             height: 100%; touch-action: manipulation; overflow: hidden;
         }
         
+        /* Uganda Colors */
         .ug-black { background: #111111; color: #ffffff; box-shadow: 0 4px 0 #000000; }
         .ug-yellow { background: #FCDC04; color: #000000; box-shadow: 0 4px 0 #b59d00; border-color: #d4b500; text-shadow: none; }
         .ug-red { background: #D90000; color: #ffffff; box-shadow: 0 4px 0 #8f0000; }
@@ -84,7 +89,7 @@
     <div id="customKeyboard" class="inapp-keyboard">
         <div class="kb-bg-overlay"></div>
         
-        <!-- Toolbar (Changed to onpointerdown so Android registers the tap) -->
+        <!-- Toolbar -->
         <div class="kb-toolbar">
             <div style="display: flex; gap: 8px;">
                 <button class="kb-tool-btn" onpointerdown="kbCopy()"><i class="fa-regular fa-copy"></i> Copy</button>
@@ -287,9 +292,12 @@
             }
         };
 
-        // 🔥 ONLY prevent default inside the keys container so scrolling doesn't happen
-        document.querySelector('.kb-keys-container').addEventListener('pointerdown', (e) => {
-            e.preventDefault(); 
+        // Prevent default touch behaviours only inside the keyboard container
+        document.querySelector('.inapp-keyboard').addEventListener('pointerdown', (e) => {
+            // Let buttons and keys work, but stop background scrolling
+            if(!e.target.closest('.kb-tool-btn')) {
+                e.preventDefault(); 
+            }
         });
 
         renderLayout();
