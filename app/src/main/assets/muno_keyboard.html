@@ -5,23 +5,22 @@
     <style>
         body {
             margin: 0;
-            padding: 0;
+            padding: 4px;
             background-color: #2E2E2E; /* Dark background */
             display: flex;
             flex-direction: column;
-            height: 100vh;
-            justify-content: center;
+            /* Removed height: 100vh so it wraps the buttons properly */
         }
         .row { display: flex; width: 100%; }
         .key {
             flex: 1;
-            height: 60px;
-            margin: 4px;
+            height: 55px; /* Fixed height for the keys */
+            margin: 3px;
             background-color: #000; /* Black keys */
             color: #FCDC04; /* Uganda Yellow */
             border: 2px solid #FCDC04;
             border-radius: 8px;
-            font-size: 20px;
+            font-size: 18px;
             font-weight: bold;
             display: flex;
             align-items: center;
@@ -49,7 +48,6 @@
 
     <script>
         function typeCharacter(char) {
-            // Send to Android phone if running as an app
             if (window.Android) {
                 window.Android.sendKey(char);
             }
