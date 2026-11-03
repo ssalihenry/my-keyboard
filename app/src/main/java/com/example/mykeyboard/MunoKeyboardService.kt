@@ -4,8 +4,10 @@ import android.annotation.SuppressLint
 import android.content.ClipData
 import android.content.ClipboardManager
 import android.content.Context
+import android.content.Intent
 import android.inputmethodservice.InputMethodService
 import android.media.AudioManager
+import android.net.Uri
 import android.view.KeyEvent
 import android.view.View
 import android.view.ViewGroup
@@ -30,8 +32,7 @@ class MunoKeyboardService : InputMethodService() {
         
         webView.settings.javaScriptEnabled = true
         webView.settings.domStorageEnabled = true
-        // 🔥 ALLOW SOUNDS TO PLAY
-        webView.settings.mediaPlaybackRequiresUserGesture = false 
+        webView.settings.mediaPlaybackRequiresUserGesture = false
         
         webView.setWebViewClient(WebViewClient())
         webView.addJavascriptInterface(WebAppInterface(this), "Android")
@@ -42,15 +43,12 @@ class MunoKeyboardService : InputMethodService() {
 
     inner class WebAppInterface(private val context: Context) {
         
-        // 🔥 FORCE PLAY CLICK SOUND AT MAX VOLUME
         @JavascriptInterface
         fun playClick() {
             try {
                 val audioManager = context.getSystemService(Context.AUDIO_SERVICE) as AudioManager
-                audioManager.playSoundEffect(AudioManager.FX_KEY_CLICK, 1.0f) // 1.0f is max volume
-            } catch (e: Exception) {
-                // Ignore if sound fails
-            }
+                audioManager.playSoundEffect(AudioManager.FX_KEY_CLICK, 1.0f)
+            } catch (e: Exception) { }
         }
 
         @JavascriptInterface
@@ -76,7 +74,6 @@ class MunoKeyboardService : InputMethodService() {
                         ic.sendKeyEvent(KeyEvent(KeyEvent.ACTION_UP, KeyEvent.KEYCODE_ENTER))
                     }
                 }
-                // Real PC Hardware Commands
                 "Esc" -> sendHardwareKey(ic, KeyEvent.KEYCODE_ESCAPE)
                 "Tab" -> sendHardwareKey(ic, KeyEvent.KEYCODE_TAB)
                 "Caps" -> sendHardwareKey(ic, KeyEvent.KEYCODE_CAPS_LOCK)
@@ -104,6 +101,19 @@ class MunoKeyboardService : InputMethodService() {
         private fun sendHardwareKey(ic: android.view.inputmethod.InputConnection, keyCode: Int) {
             ic.sendKeyEvent(KeyEvent(KeyEvent.ACTION_DOWN, keyCode))
             ic.sendKeyEvent(KeyEvent(KeyEvent.ACTION_UP, keyCode))
+        }
+
+        // 🔥 NEW FUNCTION TO OPEN THE WEBSITE
+        @JavascriptInterface
+        fun openWebsite(url: String) {
+            try {
+                requestHideSelf(0) // Hide keyboard first
+                val intent = Intent(Intent.ACTION_VIEW, Uri.parse(url))
+                intent.addFlags(Intent.FLAG_ACTIVITY_NEW_TASK) // Required when starting from a Service
+                context.startActivity(intent)
+            } catch (e: Exception) {
+                // Browser not found or error
+            }
         }
 
         @JavascriptInterface
