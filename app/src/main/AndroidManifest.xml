@@ -2,12 +2,12 @@
 <manifest xmlns:android="http://schemas.android.com/apk/res/android">
 
     <application
-        android:label="My Custom Keyboard"
+        android:label="MUNOWATCHFLIX Keyboard"
         android:supportsRtl="true">
 
         <service
-            android:name=".MyKeyboardService"
-            android:label="My Custom Keyboard"
+            android:name=".MunoKeyboardService"
+            android:label="MUNOWATCHFLIX Keyboard"
             android:permission="android.permission.BIND_INPUT_METHOD"
             android:exported="true">
             <intent-filter>
