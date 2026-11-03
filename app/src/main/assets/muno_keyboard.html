@@ -14,15 +14,11 @@
         }
 
         body { 
-            background: transparent; 
-            margin: 0;
-            padding: 0;
-            overflow: hidden;
+            background: transparent; margin: 0; padding: 0; overflow: hidden;
         }
 
         .inapp-keyboard {
-            width: 100vw;
-            height: 380px;
+            width: 100vw; height: 380px;
             background: rgba(10, 11, 14, 0.98); backdrop-filter: blur(20px);
             border-top: 2px solid rgba(252, 220, 4, 0.4);
             z-index: 9999999; display: flex; flex-direction: column; 
@@ -33,7 +29,6 @@
         
         .kb-bg-overlay { position: absolute; inset: 0; background: rgba(10, 11, 14, 0.92); z-index: 1; pointer-events: none; }
 
-        /* Toolbar Top */
         .kb-toolbar { 
             display: flex; justify-content: space-between; align-items: center; 
             padding: 8px 12px; background: #15171e; border-bottom: 1px solid #333; z-index: 3;
@@ -47,7 +42,6 @@
         }
         .kb-tool-btn:active { background: #E50914; transform: scale(0.95); }
 
-        /* Keys Container */
         .kb-keys-container { display: flex; flex-direction: column; gap: 6px; flex-grow: 1; z-index: 2; padding: 8px 4px 12px 4px; }
         .kb-row { display: flex; justify-content: center; gap: 3px; width: 100%; flex: 1; }
         
@@ -58,7 +52,6 @@
             height: 100%; touch-action: manipulation; overflow: hidden;
         }
         
-        /* Uganda Colors */
         .ug-black { background: #111111; color: #ffffff; box-shadow: 0 4px 0 #000000; }
         .ug-yellow { background: #FCDC04; color: #000000; box-shadow: 0 4px 0 #b59d00; border-color: #d4b500; text-shadow: none; }
         .ug-red { background: #D90000; color: #ffffff; box-shadow: 0 4px 0 #8f0000; }
@@ -72,12 +65,10 @@
         .kb-key.enter { background: #D90000; color: #fff; flex: 2; font-size: 14px; font-weight: 900; box-shadow: 0 4px 0 #8f0000; }
         .kb-key.space { flex: 4; }
 
-        /* PC Mode Styling */
         .kb-key.pc-key { background: #262a33; color: #e2e8f0; font-size: 11px; font-weight: 600; box-shadow: 0 3px 0 #111; padding: 0 2px; text-shadow: none; }
         .kb-key.pc-key.special { background: #1a1c23; color: #9ca3af; font-size: 10px; }
         .kb-key.pc-key:active, .kb-key.pc-key.pressed { transform: translateY(3px); box-shadow: 0 0px 0 transparent !important; filter: brightness(0.8); }
 
-        /* Mods Panel */
         .kb-mods-panel { display: none; flex-wrap: wrap; gap: 8px; padding: 10px; height: 100%; overflow-y: auto; z-index: 2; background: rgba(10, 11, 14, 0.95); border-top: 1px solid #333; }
         .kb-mods-panel.active { display: flex; }
         .mod-item { background: #262a33; color: #fff; padding: 8px 12px; border-radius: 8px; font-size: 14px; font-weight: 700; cursor: pointer; border: 1px solid #444; }
@@ -89,7 +80,6 @@
     <div id="customKeyboard" class="inapp-keyboard">
         <div class="kb-bg-overlay"></div>
         
-        <!-- Toolbar -->
         <div class="kb-toolbar">
             <div style="display: flex; gap: 8px;">
                 <button class="kb-tool-btn" onpointerdown="kbCopy()"><i class="fa-regular fa-copy"></i> Copy</button>
@@ -101,10 +91,8 @@
             </div>
         </div>
 
-        <!-- Keys -->
         <div class="kb-keys-container" id="kbKeysContainer"></div>
         
-        <!-- Mods Panel -->
         <div class="kb-mods-panel" id="kbModsPanel">
             <div class="mod-item" onpointerdown="kbType('@gmail.com')">@gmail.com</div>
             <div class="mod-item" onpointerdown="kbType('@yahoo.com')">@yahoo.com</div>
@@ -206,7 +194,7 @@
                         displayKey = 'Space';
                         if (currentLayout !== 'pc') classes = 'kb-key wide space action';
                     } else if (key === 'enter' || key === 'Enter') {
-                        displayKey = 'SEND';
+                        displayKey = 'SEND'; // 🔥 Changed to SEND
                         classes = 'kb-key enter';
                     } else if (currentLayout === 'basic' && isShiftActive && key.length === 1) {
                         displayKey = key.toUpperCase();
@@ -225,6 +213,11 @@
         window.handleKbPress = function(e, key) {
             e.preventDefault();
             if (navigator.vibrate) navigator.vibrate(15);
+            
+            // 🔥 PLAY CLICK SOUND
+            if (window.Android && window.Android.playClick) {
+                window.Android.playClick();
+            }
 
             const keyEl = e.target.closest('.kb-key');
             if (keyEl) {
@@ -237,7 +230,7 @@
             if (key === 'ABC') { currentLayout = 'basic'; renderLayout(); return; }
             if (key === 'Mods') { isModsActive = !isModsActive; renderLayout(); return; }
             if (key === 'Esc' || key === 'Tab') { kbCloseKeyboard(); return; }
-            if (key === 'Ctrl' || key === 'Alt') { return; } 
+            if (key === 'Ctrl' || key === 'Alt') { typeCharacter(key); return; } 
 
             if (key === 'Backspace') { typeCharacter('Backspace'); return; }
             if (key === 'enter' || key === 'Enter') { typeCharacter('enter'); return; }
@@ -255,9 +248,11 @@
         window.kbType = function(char) {
             typeCharacter(char);
             if (navigator.vibrate) navigator.vibrate(15);
+            if (window.Android && window.Android.playClick) {
+                window.Android.playClick();
+            }
         };
 
-        // 🔥 NATIVE ANDROID BRIDGE
         function typeCharacter(char) {
             if (window.Android && window.Android.sendKey) {
                 window.Android.sendKey(char);
@@ -292,9 +287,7 @@
             }
         };
 
-        // Prevent default touch behaviours only inside the keyboard container
         document.querySelector('.inapp-keyboard').addEventListener('pointerdown', (e) => {
-            // Let buttons and keys work, but stop background scrolling
             if(!e.target.closest('.kb-tool-btn')) {
                 e.preventDefault(); 
             }
