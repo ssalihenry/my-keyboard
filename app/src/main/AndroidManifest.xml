@@ -1,6 +1,9 @@
 <?xml version="1.0" encoding="utf-8"?>
 <manifest xmlns:android="http://schemas.android.com/apk/res/android">
 
+    <!-- This allows the keyboard to load your logo, fonts, and icons -->
+    <uses-permission android:name="android.permission.INTERNET" />
+
     <application
         android:label="MUNOWATCHFLIX Keyboard"
         android:supportsRtl="true">
