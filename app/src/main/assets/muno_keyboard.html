@@ -6,320 +6,293 @@
     <title>MUNOWATCHFLIX Keyboard</title>
     <link rel="stylesheet" href="https://cdnjs.cloudflare.com/ajax/libs/font-awesome/6.4.0/css/all.min.css">
     <style>
-        @import url('https://fonts.googleapis.com/css2?family=Inter:wght@600;800;900&display=swap');
+        @import url('https://fonts.googleapis.com/css2?family=Inter:wght@400;600;800;900&display=swap');
 
         * { 
-            box-sizing: border-box; 
-            margin: 0; 
-            padding: 0; 
-            font-family: 'Inter', sans-serif;
-            user-select: none; 
-            -webkit-user-select: none;
-            -webkit-tap-highlight-color: transparent;
+            box-sizing: border-box; margin: 0; padding: 0; font-family: 'Inter', sans-serif;
+            user-select: none; -webkit-user-select: none; -webkit-tap-highlight-color: transparent;
         }
 
         body { 
-            background: #0a0b0e; 
-            height: 100vh; 
-            display: flex; 
-            flex-direction: column; 
-            overflow: hidden;
+            background: #000; height: 100vh; display: flex; flex-direction: column; 
+            justify-content: flex-end; overflow: hidden;
         }
 
-        /* The Keyboard Container */
-        .keyboard-container {
-            width: 100vw;
-            height: 100%;
-            background: rgba(10, 11, 14, 0.98); 
+        .inapp-keyboard {
+            position: fixed; bottom: 0; left: 0; right: 0; height: 380px;
+            background: rgba(10, 11, 14, 0.98); backdrop-filter: blur(20px);
             border-top: 2px solid rgba(252, 220, 4, 0.4);
-            display: flex; 
-            flex-direction: column;
+            z-index: 9999999; display: flex; flex-direction: column; 
             background-image: url('https://i.ibb.co/2zfHb0L/1000097083-removebg-preview.png');
-            background-position: center center; 
-            background-repeat: no-repeat; 
-            background-size: 100px;
+            background-position: center center; background-repeat: no-repeat; background-size: 120px;
+        }
+        
+        .kb-bg-overlay { position: absolute; inset: 0; background: rgba(10, 11, 14, 0.92); z-index: 1; pointer-events: none; }
+
+        /* Toolbar Top */
+        .kb-toolbar { 
+            display: flex; justify-content: space-between; align-items: center; 
+            padding: 8px 12px; background: #15171e; border-bottom: 1px solid #333; z-index: 3;
             position: relative;
         }
-
-        /* Dark overlay to make text readable over the logo */
-        .bg-overlay { 
-            position: absolute; inset: 0; 
-            background: rgba(10, 11, 14, 0.92); 
-            z-index: 1; pointer-events: none; 
-        }
-
-        /* Top Toolbar */
-        .toolbar { 
-            display: flex; justify-content: space-between; align-items: center; 
-            padding: 8px 12px; background: #15171e; border-bottom: 1px solid #333; 
-            z-index: 3;
-        }
-        .tool-btn { 
-            background: #262a33; color: #fff; border: none; padding: 6px 12px; 
+        .kb-tool-btn { 
+            background: #262a33; color: #fff; border: none; padding: 8px 12px; 
             border-radius: 6px; font-size: 11px; font-weight: 700; cursor: pointer;
-            display: flex; align-items: center; gap: 4px; transition: 0.1s;
+            display: flex; align-items: center; gap: 6px; transition: 0.2s;
+            pointer-events: auto;
         }
-        .tool-btn:active { background: #E50914; transform: scale(0.95); }
+        .kb-tool-btn:active { background: #E50914; transform: scale(0.95); }
 
-        /* Keys Area */
-        .keys-container { 
-            display: flex; flex-direction: column; gap: 6px; 
-            flex-grow: 1; z-index: 2; padding: 8px 4px 12px 4px; 
-        }
-        .kb-row { display: flex; justify-content: center; gap: 4px; width: 100%; flex: 1; }
+        /* Keys Container */
+        .kb-keys-container { display: flex; flex-direction: column; gap: 6px; flex-grow: 1; z-index: 2; padding: 8px 4px 12px 4px; }
+        .kb-row { display: flex; justify-content: center; gap: 3px; width: 100%; flex: 1; }
         
         .kb-key {
-            flex: 1 1 0%; min-width: 0;
-            border-radius: 8px; display: flex; align-items: center; justify-content: center;
-            font-size: 18px; font-weight: 800; cursor: pointer; transition: all 0.1s;
+            flex: 1 1 0%; min-width: 0; border-radius: 6px; display: flex; align-items: center; justify-content: center;
+            font-size: 16px; font-weight: 800; cursor: pointer; transition: all 0.1s;
             border: 1px solid rgba(0,0,0,0.5); text-shadow: 0 1px 2px rgba(0,0,0,0.3);
-            height: 100%; touch-action: manipulation;
+            height: 100%; touch-action: manipulation; overflow: hidden;
         }
         
-        /* Uganda Flag Colors */
         .ug-black { background: #111111; color: #ffffff; box-shadow: 0 4px 0 #000000; }
         .ug-yellow { background: #FCDC04; color: #000000; box-shadow: 0 4px 0 #b59d00; border-color: #d4b500; text-shadow: none; }
         .ug-red { background: #D90000; color: #ffffff; box-shadow: 0 4px 0 #8f0000; }
 
         .kb-key:active, .kb-key.pressed { transform: translateY(4px); box-shadow: 0 0px 0 transparent !important; filter: brightness(0.8); }
 
-        /* Special Keys */
-        .kb-key.action { font-size: 13px; color: #fff; background: #262a33; box-shadow: 0 4px 0 #111; }
+        .kb-key.action { font-size: 12px; color: #fff; background: #262a33; box-shadow: 0 4px 0 #111; }
         .kb-key.wide { flex: 3.5; font-size: 14px; }
         .kb-key i { font-size: 16px; }
         .kb-key.active-shift { background: #FCDC04; color: #000; box-shadow: 0 4px 0 #b59d00; }
-        .kb-key.enter { background: #D90000; color: #fff; flex: 2; font-size: 13px; font-weight: 900; box-shadow: 0 4px 0 #8f0000; }
+        .kb-key.enter { background: #D90000; color: #fff; flex: 2; font-size: 14px; font-weight: 900; box-shadow: 0 4px 0 #8f0000; }
         .kb-key.space { flex: 4; }
 
-        /* PC Mode Specific */
+        /* PC Mode Styling */
         .kb-key.pc-key { background: #262a33; color: #e2e8f0; font-size: 11px; font-weight: 600; box-shadow: 0 3px 0 #111; padding: 0 2px; text-shadow: none; }
         .kb-key.pc-key.special { background: #1a1c23; color: #9ca3af; font-size: 10px; }
+        .kb-key.pc-key:active, .kb-key.pc-key.pressed { transform: translateY(3px); box-shadow: 0 0px 0 transparent !important; filter: brightness(0.8); }
 
         /* Mods Panel */
-        .mods-panel { 
-            display: none; flex-wrap: wrap; gap: 8px; padding: 10px; height: 100%; 
-            overflow-y: auto; z-index: 2; background: rgba(10, 11, 14, 0.95); 
-            border-top: 1px solid #333;
-        }
-        .mods-panel.active { display: flex; }
-        .mod-item { 
-            background: #262a33; color: #fff; padding: 8px 12px; border-radius: 8px; 
-            font-size: 14px; font-weight: 700; cursor: pointer; border: 1px solid #444;
-        }
+        .kb-mods-panel { display: none; flex-wrap: wrap; gap: 8px; padding: 10px; height: 100%; overflow-y: auto; z-index: 2; background: rgba(10, 11, 14, 0.95); border-top: 1px solid #333; }
+        .kb-mods-panel.active { display: flex; }
+        .mod-item { background: #262a33; color: #fff; padding: 8px 12px; border-radius: 8px; font-size: 14px; font-weight: 700; cursor: pointer; border: 1px solid #444; }
         .mod-item:active { background: #E50914; }
     </style>
 </head>
 <body>
 
-<div class="keyboard-container">
-    <div class="bg-overlay"></div>
-    
-    <!-- Toolbar -->
-    <div class="toolbar">
-        <div style="display:flex; gap:8px;">
-            <button class="tool-btn" onclick="toolAction('copy')"><i class="fa-regular fa-copy"></i> Copy</button>
-            <button class="tool-btn" onclick="toolAction('paste')"><i class="fa-regular fa-paste"></i> Paste</button>
-            <button class="tool-btn" onclick="togglePC()"><i class="fa-solid fa-desktop"></i> PC Mode</button>
-        </div>
-        <div>
-            <button class="tool-btn" onclick="hideKeyboard()"><i class="fa-solid fa-chevron-down"></i></button>
-        </div>
-    </div>
-
-    <!-- Keys -->
-    <div class="keys-container" id="keysContainer"></div>
-    
-    <!-- Mods Panel -->
-    <div class="mods-panel" id="modsPanel">
-        <div class="mod-item" onclick="typeChar('@gmail.com')">@gmail.com</div>
-        <div class="mod-item" onclick="typeChar('@yahoo.com')">@yahoo.com</div>
-        <div class="mod-item" onclick="typeChar(' +256 ')">+256</div>
-        <div class="mod-item" onclick="typeChar('😂')">😂</div>
-        <div class="mod-item" onclick="typeChar('🔥')">🔥</div>
-        <div class="mod-item" onclick="typeChar('❤️')">❤️</div>
-        <div class="mod-item" onclick="typeChar('👍')">👍</div>
-        <div class="mod-item" onclick="typeChar('🎬')">🎬</div>
-        <div class="mod-item" onclick="typeChar('🍿')">🍿</div>
-        <div class="mod-item" onclick="typeChar('🇺🇬')">🇺🇬</div>
-    </div>
-</div>
-
-<script>
-    const layoutBasic = [
-        ['q', 'w', 'e', 'r', 't', 'y', 'u', 'i', 'o', 'p'],
-        ['a', 's', 'd', 'f', 'g', 'h', 'j', 'k', 'l'],
-        ['Shift', 'z', 'x', 'c', 'v', 'b', 'n', 'm', 'Backspace'],
-        ['123', 'Mods', 'space', '.', 'enter']
-    ];
-
-    const layoutNumbers = [
-        ['1', '2', '3', '4', '5', '6', '7', '8', '9', '0'],
-        ['-', '/', ':', ';', '(', ')', '$', '&', '@', '"'],
-        ['#+=', '.', ',', '?', '!', "'", 'Backspace'],
-        ['ABC', 'Mods', 'space', 'enter']
-    ];
-
-    const layoutPC = [
-        ['Esc', 'F1', 'F2', 'F3', 'F4', 'F5', 'F6', 'F7', 'F8', 'F9', 'F10', 'F11', 'F12', 'Backspace'],
-        ['~', '1', '2', '3', '4', '5', '6', '7', '8', '9', '0', '-', '=', 'Backspace'],
-        ['Tab', 'q', 'w', 'e', 'r', 't', 'y', 'u', 'i', 'o', 'p', '[', ']', '\\'],
-        ['Caps', 'a', 's', 'd', 'f', 'g', 'h', 'j', 'k', 'l', ';', "'", 'Enter'],
-        ['Shift', 'z', 'x', 'c', 'v', 'b', 'n', 'm', ',', '.', '/', 'Shift'],
-        ['Ctrl', 'Alt', 'Mods', 'space', 'Alt', 'Ctrl']
-    ];
-
-    let currentLayout = 'basic'; 
-    let isShiftActive = false;
-    let isModsActive = false;
-    let colorIndex = 0;
-    const ugandaColors = ['ug-black', 'ug-yellow', 'ug-red'];
-
-    function renderLayout() {
-        const container = document.getElementById('keysContainer');
-        const modsPanel = document.getElementById('modsPanel');
+    <div id="customKeyboard" class="inapp-keyboard">
+        <div class="kb-bg-overlay"></div>
         
-        if (!container) return;
+        <!-- Toolbar (Changed to onpointerdown so Android registers the tap) -->
+        <div class="kb-toolbar">
+            <div style="display: flex; gap: 8px;">
+                <button class="kb-tool-btn" onpointerdown="kbCopy()"><i class="fa-regular fa-copy"></i> Copy</button>
+                <button class="kb-tool-btn" onpointerdown="kbPaste()"><i class="fa-regular fa-paste"></i> Paste</button>
+                <button class="kb-tool-btn" onpointerdown="kbTogglePC()"><i class="fa-solid fa-desktop"></i> PC Mode</button>
+            </div>
+            <div style="display: flex; gap: 8px;">
+                <button class="kb-tool-btn" onpointerdown="kbCloseKeyboard()"><i class="fa-solid fa-chevron-down"></i></button>
+            </div>
+        </div>
 
-        if (isModsActive) {
-            container.style.display = 'none';
-            modsPanel.classList.add('active');
-            return;
-        } else {
-            container.style.display = 'flex';
-            modsPanel.classList.remove('active');
+        <!-- Keys -->
+        <div class="kb-keys-container" id="kbKeysContainer"></div>
+        
+        <!-- Mods Panel -->
+        <div class="kb-mods-panel" id="kbModsPanel">
+            <div class="mod-item" onpointerdown="kbType('@gmail.com')">@gmail.com</div>
+            <div class="mod-item" onpointerdown="kbType('@yahoo.com')">@yahoo.com</div>
+            <div class="mod-item" onpointerdown="kbType(' +256 ')" >+256</div>
+            <div class="mod-item" onpointerdown="kbType('😂')">😂</div>
+            <div class="mod-item" onpointerdown="kbType('🔥')">🔥</div>
+            <div class="mod-item" onpointerdown="kbType('❤️')">❤️</div>
+            <div class="mod-item" onpointerdown="kbType('👍')">👍</div>
+            <div class="mod-item" onpointerdown="kbType('🎬')">🎬</div>
+            <div class="mod-item" onpointerdown="kbType('🍿')">🍿</div>
+            <div class="mod-item" onpointerdown="kbType('🇺🇬')">🇺🇬</div>
+        </div>
+    </div>
+
+    <script>
+        const layoutBasic = [
+            ['q', 'w', 'e', 'r', 't', 'y', 'u', 'i', 'o', 'p'],
+            ['a', 's', 'd', 'f', 'g', 'h', 'j', 'k', 'l'],
+            ['Shift', 'z', 'x', 'c', 'v', 'b', 'n', 'm', 'Backspace'],
+            ['123', 'Mods', 'space', '.', 'enter']
+        ];
+
+        const layoutNumbers = [
+            ['1', '2', '3', '4', '5', '6', '7', '8', '9', '0'],
+            ['-', '/', ':', ';', '(', ')', '$', '&', '@', '"'],
+            ['#+=', '.', ',', '?', '!', "'", 'Backspace'],
+            ['ABC', 'Mods', 'space', 'enter']
+        ];
+
+        const layoutPC = [
+            ['Esc', 'F1', 'F2', 'F3', 'F4', 'F5', 'F6', 'F7', 'F8', 'F9', 'F10', 'F11', 'F12', 'Backspace'],
+            ['~', '1', '2', '3', '4', '5', '6', '7', '8', '9', '0', '-', '=', 'Backspace'],
+            ['Tab', 'q', 'w', 'e', 'r', 't', 'y', 'u', 'i', 'o', 'p', '[', ']', '\\'],
+            ['Caps', 'a', 's', 'd', 'f', 'g', 'h', 'j', 'k', 'l', ';', "'", 'Enter'],
+            ['Shift', 'z', 'x', 'c', 'v', 'b', 'n', 'm', ',', '.', '/', 'Shift'],
+            ['Ctrl', 'Alt', 'Mods', 'space', 'Alt', 'Ctrl']
+        ];
+
+        let currentLayout = 'basic'; 
+        let isShiftActive = false;
+        let isModsActive = false;
+        let colorIndex = 0;
+        const ugandaColors = ['ug-black', 'ug-yellow', 'ug-red'];
+
+        function renderLayout() {
+            const container = document.getElementById('kbKeysContainer');
+            const modsPanel = document.getElementById('kbModsPanel');
+            if (!container) return;
+
+            if (isModsActive) {
+                container.style.display = 'none';
+                modsPanel.classList.add('active');
+                return;
+            } else {
+                container.style.display = 'flex';
+                modsPanel.classList.remove('active');
+            }
+
+            let layout = layoutBasic;
+            if (currentLayout === 'numbers') layout = layoutNumbers;
+            if (currentLayout === 'pc') layout = layoutPC;
+
+            let html = '';
+            colorIndex = 0; 
+
+            layout.forEach(row => {
+                html += `<div class="kb-row">`;
+                row.forEach(key => {
+                    let displayKey = key;
+                    let classes = 'kb-key';
+                    let actionAttr = `onpointerdown="handleKbPress(event, '${key}')"`;
+
+                    if (currentLayout === 'pc') {
+                        classes += ' pc-key';
+                        if (['Ctrl', 'Alt', 'Shift', 'Tab', 'Caps', 'Esc', 'Enter', 'Backspace'].includes(key)) {
+                            classes += ' special';
+                        }
+                        if (key === 'space') classes += ' wide';
+                    } else {
+                        if (key.length === 1 && key !== ' ') {
+                            classes += ` ${ugandaColors[colorIndex % 3]}`;
+                            colorIndex++;
+                        }
+                    }
+
+                    if (key === 'Shift') {
+                        displayKey = '<i class="fa-solid fa-arrow-up"></i>';
+                        if (currentLayout !== 'pc') classes = 'kb-key action';
+                        if (isShiftActive) classes += ' active-shift';
+                    } else if (key === 'Backspace') {
+                        displayKey = '<i class="fa-solid fa-delete-left"></i>';
+                        if (currentLayout !== 'pc') classes = 'kb-key action';
+                    } else if (key === '123' || key === 'ABC' || key === '#+=') {
+                        classes = 'kb-key action';
+                    } else if (key === 'Mods') {
+                        displayKey = '<i class="fa-solid fa-wand-magic-sparkles"></i>';
+                        classes = 'kb-key action';
+                    } else if (key === 'space') {
+                        displayKey = 'Space';
+                        if (currentLayout !== 'pc') classes = 'kb-key wide space action';
+                    } else if (key === 'enter' || key === 'Enter') {
+                        displayKey = '<i class="fa-solid fa-arrow-turn-down"></i>';
+                        classes = 'kb-key enter';
+                    } else if (currentLayout === 'basic' && isShiftActive && key.length === 1) {
+                        displayKey = key.toUpperCase();
+                    } else if (key === 'Caps') {
+                        classes += isShiftActive ? ' active-shift' : '';
+                    }
+
+                    html += `<div class="${classes}" ${actionAttr}>${displayKey}</div>`;
+                });
+                html += `</div>`;
+            });
+
+            container.innerHTML = html;
         }
 
-        let layout = layoutBasic;
-        if (currentLayout === 'numbers') layout = layoutNumbers;
-        if (currentLayout === 'pc') layout = layoutPC;
+        window.handleKbPress = function(e, key) {
+            e.preventDefault();
+            if (navigator.vibrate) navigator.vibrate(15);
 
-        let html = '';
-        colorIndex = 0; 
+            const keyEl = e.target.closest('.kb-key');
+            if (keyEl) {
+                keyEl.classList.add('pressed');
+                setTimeout(() => keyEl.classList.remove('pressed'), 100);
+            }
 
-        layout.forEach(row => {
-            html += `<div class="kb-row">`;
-            row.forEach(key => {
-                let displayKey = key;
-                let classes = 'kb-key';
-                let actionAttr = `onpointerdown="handlePress(event, '${key}')"`;
+            if (key === 'Shift' || key === 'Caps') { isShiftActive = !isShiftActive; renderLayout(); return; }
+            if (key === '123') { currentLayout = 'numbers'; isShiftActive = false; renderLayout(); return; }
+            if (key === 'ABC') { currentLayout = 'basic'; renderLayout(); return; }
+            if (key === 'Mods') { isModsActive = !isModsActive; renderLayout(); return; }
+            if (key === 'Esc' || key === 'Tab') { kbCloseKeyboard(); return; }
+            if (key === 'Ctrl' || key === 'Alt') { return; } 
 
-                // PC MODE STYLING
-                if (currentLayout === 'pc') {
-                    classes += ' pc-key';
-                    if (['Ctrl', 'Alt', 'Shift', 'Tab', 'Caps', 'Esc', 'Enter', 'Backspace'].includes(key)) {
-                        classes += ' special';
-                    }
-                } 
-                // UGANDA COLORS (BASIC & NUMBERS)
-                else {
-                    if (key.length === 1 && key !== ' ') {
-                        classes += ` ${ugandaColors[colorIndex % 3]}`;
-                        colorIndex++;
-                    }
-                }
+            if (key === 'Backspace') { typeCharacter('Backspace'); return; }
+            if (key === 'enter' || key === 'Enter') { typeCharacter('enter'); return; }
+            if (key === 'space') { typeCharacter(' '); return; }
 
-                if (key === 'Shift') {
-                    displayKey = '<i class="fa-solid fa-arrow-up"></i>';
-                    if (currentLayout !== 'pc') classes = 'kb-key action';
-                    if (isShiftActive) classes += ' active-shift';
-                } else if (key === 'Backspace') {
-                    displayKey = '<i class="fa-solid fa-delete-left"></i>';
-                    if (currentLayout !== 'pc') classes = 'kb-key action';
-                } else if (key === '123' || key === 'ABC' || key === '#+=') {
-                    classes = 'kb-key action';
-                } else if (key === 'Mods') {
-                    displayKey = '<i class="fa-solid fa-wand-magic-sparkles"></i>';
-                    classes = 'kb-key action';
-                } else if (key === 'space') {
-                    displayKey = 'Space';
-                    if (currentLayout !== 'pc') classes = 'kb-key wide space action';
-                } else if (key === 'enter' || key === 'Enter') {
-                    displayKey = '<i class="fa-solid fa-arrow-turn-down"></i>';
-                    classes = 'kb-key enter';
-                } else if (currentLayout === 'basic' && isShiftActive && key.length === 1) {
-                    displayKey = key.toUpperCase();
-                } else if (key === 'Caps') {
-                    classes += isShiftActive ? ' active-shift' : '';
-                }
+            let charToType = key;
+            if (isShiftActive && key.length === 1) {
+                charToType = key.toUpperCase();
+                isShiftActive = false;
+                renderLayout();
+            }
+            typeCharacter(charToType);
+        };
 
-                html += `<div class="${classes}" ${actionAttr}>${displayKey}</div>`;
-            });
-            html += `</div>`;
+        window.kbType = function(char) {
+            typeCharacter(char);
+            if (navigator.vibrate) navigator.vibrate(15);
+        };
+
+        // 🔥 NATIVE ANDROID BRIDGE
+        function typeCharacter(char) {
+            if (window.Android && window.Android.sendKey) {
+                window.Android.sendKey(char);
+            }
+        }
+
+        window.kbCopy = function() {
+            if (window.Android && window.Android.copyText) {
+                window.Android.copyText();
+            }
+        };
+
+        window.kbPaste = function() {
+            if (window.Android && window.Android.pasteText) {
+                window.Android.pasteText();
+            }
+        };
+
+        window.kbTogglePC = function() {
+            if (currentLayout === 'pc') {
+                currentLayout = 'basic';
+            } else {
+                currentLayout = 'pc';
+            }
+            isModsActive = false;
+            renderLayout();
+        };
+
+        window.kbCloseKeyboard = function() {
+            if (window.Android && window.Android.hideKeyboard) {
+                window.Android.hideKeyboard();
+            }
+        };
+
+        // 🔥 ONLY prevent default inside the keys container so scrolling doesn't happen
+        document.querySelector('.kb-keys-container').addEventListener('pointerdown', (e) => {
+            e.preventDefault(); 
         });
 
-        container.innerHTML = html;
-    }
-
-    function handlePress(e, key) {
-        e.preventDefault();
-        if (navigator.vibrate) navigator.vibrate(15);
-
-        const keyEl = e.target.closest('.kb-key');
-        if (keyEl) {
-            keyEl.classList.add('pressed');
-            setTimeout(() => keyEl.classList.remove('pressed'), 100);
-        }
-
-        if (key === 'Shift' || key === 'Caps') { isShiftActive = !isShiftActive; renderLayout(); return; }
-        if (key === '123') { currentLayout = 'numbers'; isShiftActive = false; renderLayout(); return; }
-        if (key === 'ABC') { currentLayout = 'basic'; renderLayout(); return; }
-        if (key === 'Mods') { isModsActive = !isModsActive; renderLayout(); return; }
-        if (key === 'Esc' || key === 'Tab') { hideKeyboard(); return; }
-        if (key === 'Ctrl' || key === 'Alt') { return; } 
-
-        if (key === 'Backspace') { typeChar('Backspace'); return; }
-        if (key === 'enter' || key === 'Enter') { typeChar('enter'); return; }
-        if (key === 'space') { typeChar(' '); return; }
-
-        let charToType = key;
-        if (isShiftActive && key.length === 1) {
-            charToType = key.toUpperCase();
-            isShiftActive = false;
-            renderLayout();
-        }
-        typeChar(charToType);
-    }
-
-    // 🔥 THE NATIVE ANDROID BRIDGE
-    function typeChar(char) {
-        if (navigator.vibrate) navigator.vibrate(10);
-        if (window.Android && window.Android.sendKey) {
-            window.Android.sendKey(char);
-        } else {
-            console.log("Typed: " + char); // For testing in a normal browser
-        }
-    }
-
-    function togglePC() {
-        if (currentLayout === 'pc') {
-            currentLayout = 'basic';
-        } else {
-            currentLayout = 'pc';
-        }
-        isModsActive = false;
         renderLayout();
-    }
-
-    function toolAction(action) {
-        if (window.Android) {
-            if (action === 'copy' && window.Android.copyText) window.Android.copyText();
-            if (action === 'paste' && window.Android.pasteText) window.Android.pasteText();
-        }
-    }
-
-    function hideKeyboard() {
-        if (window.Android && window.Android.hideKeyboard) {
-            window.Android.hideKeyboard();
-        }
-    }
-
-    // Initial Render
-    renderLayout();
-
-    // Prevent default touch behaviours to stop scrolling/zooming
-    document.addEventListener('touchstart', e => { e.preventDefault(); }, { passive: false });
-    document.addEventListener('contextmenu', e => { e.preventDefault(); });
-
-</script>
+    </script>
 </body>
 </html>
