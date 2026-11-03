@@ -1,0 +1,65 @@
+<!DOCTYPE html>
+<html>
+<head>
+    <meta name="viewport" content="width=device-width, initial-scale=1.0">
+    <style>
+        body {
+            margin: 0;
+            padding: 0;
+            background-color: #2E2E2E; /* Dark background */
+            display: flex;
+            flex-direction: column;
+            height: 100vh;
+            justify-content: center;
+        }
+        .row { display: flex; width: 100%; }
+        .key {
+            flex: 1;
+            height: 60px;
+            margin: 4px;
+            background-color: #000; /* Black keys */
+            color: #FCDC04; /* Uganda Yellow */
+            border: 2px solid #FCDC04;
+            border-radius: 8px;
+            font-size: 20px;
+            font-weight: bold;
+            display: flex;
+            align-items: center;
+            justify-content: center;
+            user-select: none;
+        }
+        .key:active { background-color: #FCDC04; color: #000; }
+    </style>
+</head>
+<body>
+
+    <div class="row">
+        <div class="key" onclick="typeCharacter('Q')">Q</div>
+        <div class="key" onclick="typeCharacter('W')">W</div>
+        <div class="key" onclick="typeCharacter('E')">E</div>
+        <div class="key" onclick="typeCharacter('R')">R</div>
+        <div class="key" onclick="typeCharacter('T')">T</div>
+        <div class="key" onclick="typeCharacter('Y')">Y</div>
+    </div>
+    
+    <div class="row">
+        <div class="key" onclick="typeCharacter(' ')" style="flex: 3;">SPACE</div>
+        <div class="key" onclick="deleteCharacter()" style="flex: 2;">DEL</div>
+    </div>
+
+    <script>
+        function typeCharacter(char) {
+            // Send to Android phone if running as an app
+            if (window.Android) {
+                window.Android.sendKey(char);
+            }
+        }
+        
+        function deleteCharacter() {
+            if (window.Android) {
+                window.Android.deleteKey();
+            }
+        }
+    </script>
+</body>
+</html>
