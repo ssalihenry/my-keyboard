@@ -13,9 +13,7 @@
             user-select: none; -webkit-user-select: none; -webkit-tap-highlight-color: transparent;
         }
 
-        body { 
-            background: transparent; margin: 0; padding: 0; overflow: hidden;
-        }
+        body { background: transparent; margin: 0; padding: 0; overflow: hidden; }
 
         .inapp-keyboard {
             width: 100vw; height: 380px;
@@ -41,6 +39,18 @@
             pointer-events: auto;
         }
         .kb-tool-btn:active { background: #E50914; transform: scale(0.95); }
+
+        /* 🔥 NEW CODING SNIPPET BAR */
+        .kb-code-snippets {
+            display: none; background: #121418; border-bottom: 1px solid #333; 
+            padding: 6px; gap: 6px; overflow-x: auto; white-space: nowrap; z-index: 3;
+        }
+        .kb-code-snippets.active { display: flex; }
+        .snippet-item {
+            background: #262a33; color: #81C784; padding: 6px 10px; border-radius: 4px; 
+            font-size: 12px; font-weight: 700; border: 1px solid #444; cursor: pointer;
+        }
+        .snippet-item:active { background: #4CAF50; color: #fff; }
 
         .kb-keys-container { display: flex; flex-direction: column; gap: 6px; flex-grow: 1; z-index: 2; padding: 8px 4px 12px 4px; }
         .kb-row { display: flex; justify-content: center; gap: 3px; width: 100%; flex: 1; }
@@ -68,6 +78,9 @@
         .kb-key.pc-key { background: #262a33; color: #e2e8f0; font-size: 11px; font-weight: 600; box-shadow: 0 3px 0 #111; padding: 0 2px; text-shadow: none; }
         .kb-key.pc-key.special { background: #1a1c23; color: #9ca3af; font-size: 10px; }
         .kb-key.pc-key:active, .kb-key.pc-key.pressed { transform: translateY(3px); box-shadow: 0 0px 0 transparent !important; filter: brightness(0.8); }
+        
+        .kb-key.code-key { background: #1e1e1e; color: #4CAF50; font-size: 16px; font-weight: bold; box-shadow: 0 3px 0 #000; }
+        .kb-key.code-key.special { background: #2d2d2d; color: #81C784; font-size: 11px; }
 
         .kb-mods-panel { display: none; flex-wrap: wrap; gap: 8px; padding: 10px; height: 100%; overflow-y: auto; z-index: 2; background: rgba(10, 11, 14, 0.95); border-top: 1px solid #333; }
         .kb-mods-panel.active { display: flex; }
@@ -81,14 +94,31 @@
         <div class="kb-bg-overlay"></div>
         
         <div class="kb-toolbar">
-            <div style="display: flex; gap: 8px;">
-                <button class="kb-tool-btn" onpointerdown="kbCopy()"><i class="fa-regular fa-copy"></i> Copy</button>
-                <button class="kb-tool-btn" onpointerdown="kbPaste()"><i class="fa-regular fa-paste"></i> Paste</button>
-                <button class="kb-tool-btn" onpointerdown="kbTogglePC()"><i class="fa-solid fa-desktop"></i> PC Mode</button>
+            <div style="display: flex; gap: 4px;">
+                <button class="kb-tool-btn" onpointerdown="kbCopy()"><i class="fa-regular fa-copy"></i></button>
+                <button class="kb-tool-btn" onpointerdown="kbPaste()"><i class="fa-regular fa-paste"></i></button>
+                <button class="kb-tool-btn" onpointerdown="kbTogglePC()"><i class="fa-solid fa-desktop"></i> PC</button>
+                <button class="kb-tool-btn" onpointerdown="kbToggleCode()"><i class="fa-solid fa-code"></i> Code</button>
             </div>
             <div style="display: flex; gap: 8px;">
                 <button class="kb-tool-btn" onpointerdown="kbCloseKeyboard()"><i class="fa-solid fa-chevron-down"></i></button>
             </div>
+        </div>
+
+        <!-- 🔥 CODING SNIPPETS BAR -->
+        <div class="kb-code-snippets" id="kbCodeSnippets">
+            <div class="snippet-item" onpointerdown="kbType('.com')">.com</div>
+            <div class="snippet-item" onpointerdown="kbType('.html')">.html</div>
+            <div class="snippet-item" onpointerdown="kbType('.css')">.css</div>
+            <div class="snippet-item" onpointerdown="kbType('.js')">.js</div>
+            <div class="snippet-item" onpointerdown="kbType('wa.me/')">wa.me/</div>
+            <div class="snippet-item" onpointerdown="kbType('https://')">https://</div>
+            <div class="snippet-item" onpointerdown="kbType('<div>')"><div></div>
+            <div class="snippet-item" onpointerdown="kbType('</div>')"></div></div>
+            <div class="snippet-item" onpointerdown="kbType('()')">()</div>
+            <div class="snippet-item" onpointerdown="kbType('{}')">{}</div>
+            <div class="snippet-item" onpointerdown="kbType('==')">==</div>
+            <div class="snippet-item" onpointerdown="kbType('=>')">=></div>
         </div>
 
         <div class="kb-keys-container" id="kbKeysContainer"></div>
@@ -131,6 +161,14 @@
             ['Ctrl', 'Alt', 'Mods', 'space', 'Alt', 'Ctrl']
         ];
 
+        const layoutCoding = [
+            ['1', '2', '3', '4', '5', '6', '7', '8', '9', '0'],
+            ['{', '}', '[', ']', '(', ')', '<', '>', '=', '+'],
+            ['#', '$', '%', '^', '&', '*', '|', '~', '`', '!'],
+            ['Tab', ';', ':', '"', "'", '/', '\\', ',', '.', 'Backspace'],
+            ['Ctrl', 'Alt', 'Mods', 'space', 'enter']
+        ];
+
         let currentLayout = 'basic'; 
         let isShiftActive = false;
         let isModsActive = false;
@@ -140,20 +178,30 @@
         function renderLayout() {
             const container = document.getElementById('kbKeysContainer');
             const modsPanel = document.getElementById('kbModsPanel');
+            const snippetBar = document.getElementById('kbCodeSnippets');
             if (!container) return;
 
             if (isModsActive) {
                 container.style.display = 'none';
                 modsPanel.classList.add('active');
+                snippetBar.classList.remove('active'); // Hide snippets in Mods
                 return;
             } else {
                 container.style.display = 'flex';
                 modsPanel.classList.remove('active');
+                
+                // 🔥 SHOW SNIPPETS ONLY IN CODING MODE
+                if (currentLayout === 'coding') {
+                    snippetBar.classList.add('active');
+                } else {
+                    snippetBar.classList.remove('active');
+                }
             }
 
             let layout = layoutBasic;
             if (currentLayout === 'numbers') layout = layoutNumbers;
             if (currentLayout === 'pc') layout = layoutPC;
+            if (currentLayout === 'coding') layout = layoutCoding;
 
             let html = '';
             colorIndex = 0; 
@@ -171,6 +219,12 @@
                             classes += ' special';
                         }
                         if (key === 'space') classes += ' wide';
+                    } else if (currentLayout === 'coding') {
+                        classes += ' code-key'; 
+                        if (['Ctrl', 'Alt', 'Tab', 'Backspace'].includes(key)) {
+                            classes += ' special';
+                        }
+                        if (key === 'space') classes += ' wide';
                     } else {
                         if (key.length === 1 && key !== ' ') {
                             classes += ` ${ugandaColors[colorIndex % 3]}`;
@@ -184,7 +238,7 @@
                         if (isShiftActive) classes += ' active-shift';
                     } else if (key === 'Backspace') {
                         displayKey = '<i class="fa-solid fa-delete-left"></i>';
-                        if (currentLayout !== 'pc') classes = 'kb-key action';
+                        if (currentLayout !== 'pc' && currentLayout !== 'coding') classes = 'kb-key action';
                     } else if (key === '123' || key === 'ABC' || key === '#+=') {
                         classes = 'kb-key action';
                     } else if (key === 'Mods') {
@@ -192,9 +246,9 @@
                         classes = 'kb-key action';
                     } else if (key === 'space') {
                         displayKey = 'Space';
-                        if (currentLayout !== 'pc') classes = 'kb-key wide space action';
+                        if (currentLayout !== 'pc' && currentLayout !== 'coding') classes = 'kb-key wide space action';
                     } else if (key === 'enter' || key === 'Enter') {
-                        displayKey = 'SEND'; // 🔥 Changed to SEND
+                        displayKey = 'SEND';
                         classes = 'kb-key enter';
                     } else if (currentLayout === 'basic' && isShiftActive && key.length === 1) {
                         displayKey = key.toUpperCase();
@@ -214,7 +268,6 @@
             e.preventDefault();
             if (navigator.vibrate) navigator.vibrate(15);
             
-            // 🔥 PLAY CLICK SOUND
             if (window.Android && window.Android.playClick) {
                 window.Android.playClick();
             }
@@ -229,7 +282,7 @@
             if (key === '123') { currentLayout = 'numbers'; isShiftActive = false; renderLayout(); return; }
             if (key === 'ABC') { currentLayout = 'basic'; renderLayout(); return; }
             if (key === 'Mods') { isModsActive = !isModsActive; renderLayout(); return; }
-            if (key === 'Esc' || key === 'Tab') { kbCloseKeyboard(); return; }
+            if (key === 'Esc' || key === 'Tab') { typeCharacter(key); return; } 
             if (key === 'Ctrl' || key === 'Alt') { typeCharacter(key); return; } 
 
             if (key === 'Backspace') { typeCharacter('Backspace'); return; }
@@ -259,38 +312,27 @@
             }
         }
 
-        window.kbCopy = function() {
-            if (window.Android && window.Android.copyText) {
-                window.Android.copyText();
-            }
-        };
-
-        window.kbPaste = function() {
-            if (window.Android && window.Android.pasteText) {
-                window.Android.pasteText();
-            }
-        };
-
+        window.kbCopy = function() { if (window.Android && window.Android.copyText) window.Android.copyText(); };
+        window.kbPaste = function() { if (window.Android && window.Android.pasteText) window.Android.pasteText(); };
+        
         window.kbTogglePC = function() {
-            if (currentLayout === 'pc') {
-                currentLayout = 'basic';
-            } else {
-                currentLayout = 'pc';
-            }
+            currentLayout = (currentLayout === 'pc') ? 'basic' : 'pc';
+            isModsActive = false;
+            renderLayout();
+        };
+
+        window.kbToggleCode = function() {
+            currentLayout = (currentLayout === 'coding') ? 'basic' : 'coding';
             isModsActive = false;
             renderLayout();
         };
 
         window.kbCloseKeyboard = function() {
-            if (window.Android && window.Android.hideKeyboard) {
-                window.Android.hideKeyboard();
-            }
+            if (window.Android && window.Android.hideKeyboard) window.Android.hideKeyboard();
         };
 
         document.querySelector('.inapp-keyboard').addEventListener('pointerdown', (e) => {
-            if(!e.target.closest('.kb-tool-btn')) {
-                e.preventDefault(); 
-            }
+            if(!e.target.closest('.kb-tool-btn')) e.preventDefault(); 
         });
 
         renderLayout();
