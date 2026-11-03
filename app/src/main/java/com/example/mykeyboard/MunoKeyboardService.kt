@@ -5,11 +5,11 @@ import android.content.ClipData
 import android.content.ClipboardManager
 import android.content.Context
 import android.inputmethodservice.InputMethodService
+import android.media.AudioManager
 import android.view.KeyEvent
 import android.view.View
 import android.view.ViewGroup
 import android.view.inputmethod.EditorInfo
-import android.view.inputmethod.InputConnection
 import android.webkit.JavascriptInterface
 import android.webkit.WebView
 import android.webkit.WebViewClient
@@ -27,13 +27,10 @@ class MunoKeyboardService : InputMethodService() {
         
         webView.setLayerType(View.LAYER_TYPE_HARDWARE, null)
         webView.setBackgroundColor(0x00000000)
-        
         webView.settings.javaScriptEnabled = true
         webView.settings.domStorageEnabled = true
         webView.setWebViewClient(WebViewClient())
-        
         webView.addJavascriptInterface(WebAppInterface(this), "Android")
-        
         webView.loadUrl("file:///android_asset/muno_keyboard.html")
         
         return webView
@@ -41,58 +38,63 @@ class MunoKeyboardService : InputMethodService() {
 
     inner class WebAppInterface(private val context: Context) {
         
+        // 🔥 THIS PLAYS THE KEYBOARD SOUND
+        @JavascriptInterface
+        fun playClick() {
+            val audioManager = context.getSystemService(Context.AUDIO_SERVICE) as AudioManager
+            audioManager.playSoundEffect(AudioManager.FX_KEY_CLICK)
+        }
+
         @JavascriptInterface
         fun sendKey(key: String) {
-            val inputConnection = currentInputConnection ?: return
+            val ic = currentInputConnection ?: return
             
             when (key) {
                 "Backspace" -> {
-                    val selectedText = inputConnection.getSelectedText(0)
+                    val selectedText = ic.getSelectedText(0)
                     if (selectedText != null && selectedText.length > 0) {
-                        inputConnection.commitText("", 1)
+                        ic.commitText("", 1)
                     } else {
-                        inputConnection.deleteSurroundingText(1, 0)
+                        ic.deleteSurroundingText(1, 0)
                     }
                 }
                 "enter", "Enter" -> {
-                    // Triggers the "Send" button in WhatsApp/Chrome if available
-                    val editorInfo = currentInputEditorInfo
-                    val imeAction = editorInfo?.imeOptions?.and(EditorInfo.IME_MASK_ACTION)
+                    val action = currentInputEditorInfo?.imeOptions?.and(EditorInfo.IME_MASK_ACTION) ?: EditorInfo.IME_ACTION_NONE
                     
-                    if (imeAction == EditorInfo.IME_ACTION_SEND || imeAction == EditorInfo.IME_ACTION_GO) {
-                        inputConnection.performEditorAction(imeAction)
+                    if (action == EditorInfo.IME_ACTION_SEND || action == EditorInfo.IME_ACTION_GO || action == EditorInfo.IME_ACTION_SEARCH) {
+                        ic.performEditorAction(action)
                     } else {
-                        // Default standard Enter
-                        inputConnection.sendKeyEvent(KeyEvent(KeyEvent.ACTION_DOWN, KeyEvent.KEYCODE_ENTER))
-                        inputConnection.sendKeyEvent(KeyEvent(KeyEvent.ACTION_UP, KeyEvent.KEYCODE_ENTER))
+                        // 🔥 RAW HARDWARE ENTER (Forces ChatGPT, Chrome, etc. to send)
+                        ic.sendKeyEvent(KeyEvent(KeyEvent.ACTION_DOWN, KeyEvent.KEYCODE_ENTER))
+                        ic.sendKeyEvent(KeyEvent(KeyEvent.ACTION_UP, KeyEvent.KEYCODE_ENTER))
                     }
                 }
-                // 🔥 REAL PC HARDWARE COMMANDS
-                "Esc" -> sendHardwareKey(inputConnection, KeyEvent.KEYCODE_ESCAPE)
-                "Tab" -> sendHardwareKey(inputConnection, KeyEvent.KEYCODE_TAB)
-                "Caps" -> sendHardwareKey(inputConnection, KeyEvent.KEYCODE_CAPS_LOCK)
-                "Ctrl" -> sendHardwareKey(inputConnection, KeyEvent.KEYCODE_CTRL_LEFT)
-                "Alt" -> sendHardwareKey(inputConnection, KeyEvent.KEYCODE_ALT_LEFT)
-                "F1" -> sendHardwareKey(inputConnection, KeyEvent.KEYCODE_F1)
-                "F2" -> sendHardwareKey(inputConnection, KeyEvent.KEYCODE_F2)
-                "F3" -> sendHardwareKey(inputConnection, KeyEvent.KEYCODE_F3)
-                "F4" -> sendHardwareKey(inputConnection, KeyEvent.KEYCODE_F4)
-                "F5" -> sendHardwareKey(inputConnection, KeyEvent.KEYCODE_F5)
-                "F6" -> sendHardwareKey(inputConnection, KeyEvent.KEYCODE_F6)
-                "F7" -> sendHardwareKey(inputConnection, KeyEvent.KEYCODE_F7)
-                "F8" -> sendHardwareKey(inputConnection, KeyEvent.KEYCODE_F8)
-                "F9" -> sendHardwareKey(inputConnection, KeyEvent.KEYCODE_F9)
-                "F10" -> sendHardwareKey(inputConnection, KeyEvent.KEYCODE_F10)
-                "F11" -> sendHardwareKey(inputConnection, KeyEvent.KEYCODE_F11)
-                "F12" -> sendHardwareKey(inputConnection, KeyEvent.KEYCODE_F12)
+                // Real PC Hardware Commands
+                "Esc" -> sendHardwareKey(ic, KeyEvent.KEYCODE_ESCAPE)
+                "Tab" -> sendHardwareKey(ic, KeyEvent.KEYCODE_TAB)
+                "Caps" -> sendHardwareKey(ic, KeyEvent.KEYCODE_CAPS_LOCK)
+                "Ctrl" -> sendHardwareKey(ic, KeyEvent.KEYCODE_CTRL_LEFT)
+                "Alt" -> sendHardwareKey(ic, KeyEvent.KEYCODE_ALT_LEFT)
+                "F1" -> sendHardwareKey(ic, KeyEvent.KEYCODE_F1)
+                "F2" -> sendHardwareKey(ic, KeyEvent.KEYCODE_F2)
+                "F3" -> sendHardwareKey(ic, KeyEvent.KEYCODE_F3)
+                "F4" -> sendHardwareKey(ic, KeyEvent.KEYCODE_F4)
+                "F5" -> sendHardwareKey(ic, KeyEvent.KEYCODE_F5)
+                "F6" -> sendHardwareKey(ic, KeyEvent.KEYCODE_F6)
+                "F7" -> sendHardwareKey(ic, KeyEvent.KEYCODE_F7)
+                "F8" -> sendHardwareKey(ic, KeyEvent.KEYCODE_F8)
+                "F9" -> sendHardwareKey(ic, KeyEvent.KEYCODE_F9)
+                "F10" -> sendHardwareKey(ic, KeyEvent.KEYCODE_F10)
+                "F11" -> sendHardwareKey(ic, KeyEvent.KEYCODE_F11)
+                "F12" -> sendHardwareKey(ic, KeyEvent.KEYCODE_F12)
                 
                 else -> {
-                    inputConnection.commitText(key, 1)
+                    ic.commitText(key, 1)
                 }
             }
         }
 
-        private fun sendHardwareKey(ic: InputConnection, keyCode: Int) {
+        private fun sendHardwareKey(ic: android.view.inputmethod.InputConnection, keyCode: Int) {
             ic.sendKeyEvent(KeyEvent(KeyEvent.ACTION_DOWN, keyCode))
             ic.sendKeyEvent(KeyEvent(KeyEvent.ACTION_UP, keyCode))
         }
