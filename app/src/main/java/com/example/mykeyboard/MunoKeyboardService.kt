@@ -27,8 +27,12 @@ class MunoKeyboardService : InputMethodService() {
         
         webView.setLayerType(View.LAYER_TYPE_HARDWARE, null)
         webView.setBackgroundColor(0x00000000)
+        
         webView.settings.javaScriptEnabled = true
         webView.settings.domStorageEnabled = true
+        // 🔥 ALLOW SOUNDS TO PLAY
+        webView.settings.mediaPlaybackRequiresUserGesture = false 
+        
         webView.setWebViewClient(WebViewClient())
         webView.addJavascriptInterface(WebAppInterface(this), "Android")
         webView.loadUrl("file:///android_asset/muno_keyboard.html")
@@ -38,11 +42,15 @@ class MunoKeyboardService : InputMethodService() {
 
     inner class WebAppInterface(private val context: Context) {
         
-        // 🔥 THIS PLAYS THE KEYBOARD SOUND
+        // 🔥 FORCE PLAY CLICK SOUND AT MAX VOLUME
         @JavascriptInterface
         fun playClick() {
-            val audioManager = context.getSystemService(Context.AUDIO_SERVICE) as AudioManager
-            audioManager.playSoundEffect(AudioManager.FX_KEY_CLICK)
+            try {
+                val audioManager = context.getSystemService(Context.AUDIO_SERVICE) as AudioManager
+                audioManager.playSoundEffect(AudioManager.FX_KEY_CLICK, 1.0f) // 1.0f is max volume
+            } catch (e: Exception) {
+                // Ignore if sound fails
+            }
         }
 
         @JavascriptInterface
@@ -64,7 +72,6 @@ class MunoKeyboardService : InputMethodService() {
                     if (action == EditorInfo.IME_ACTION_SEND || action == EditorInfo.IME_ACTION_GO || action == EditorInfo.IME_ACTION_SEARCH) {
                         ic.performEditorAction(action)
                     } else {
-                        // 🔥 RAW HARDWARE ENTER (Forces ChatGPT, Chrome, etc. to send)
                         ic.sendKeyEvent(KeyEvent(KeyEvent.ACTION_DOWN, KeyEvent.KEYCODE_ENTER))
                         ic.sendKeyEvent(KeyEvent(KeyEvent.ACTION_UP, KeyEvent.KEYCODE_ENTER))
                     }
